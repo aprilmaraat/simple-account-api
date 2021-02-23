@@ -4,5 +4,9 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SimpleAccount.Models\SimpleAccount.Models.csproj" />
+  </ItemGroup>
+
 
 </Project>
