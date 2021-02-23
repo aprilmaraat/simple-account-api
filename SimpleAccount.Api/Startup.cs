@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using SimpleAccount.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using SimpleAccount.Services;
 
 namespace SimpleAccount.Api
 {
@@ -22,6 +23,11 @@ namespace SimpleAccount.Api
         {
             IConfigurationBuilder builder = GetConfigurationBuilder(environment);
             Configuration = builder.Build();
+            // Run SQL migrations
+            SQLService.Init(Configuration);
+            SQLService.SetContentRootPath(environment.ContentRootPath.Replace("\\SimpleAccount.Api", "\\SimpleAccount"));
+
+            Task.Run(async () => await SQLService.RunMigration());
         }
 
         public IConfiguration Configuration { get; }
