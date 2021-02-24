@@ -125,11 +125,14 @@ namespace SimpleAccount.Services
                 var exist = await _context.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
                 if (exist == null)
                     return Response<User>.Error("User doesn't exist.");
-                if (exist.Email == user.Email)
-                    return Response<User>.Error("Email already used.");
+                if (exist.Email != user.Email)
+                {
+                    var any = await _context.Users.AnyAsync(x => x.Email == user.Email);
+                    if(any)
+                        return Response<User>.Error("Email already used.");
+                }
                 exist.FirstName = user.FirstName;
                 exist.LastName = user.LastName;
-                exist.Email = user.Email;
                 exist.Password = user.Password;
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -167,29 +170,46 @@ namespace SimpleAccount.Services
 
         private void SendEmail(string toEmail, string toName) 
         {
-            var fromAddress = new MailAddress(_emailConfiguration.Email, _emailConfiguration.Name);
-            var toAddress = new MailAddress(toEmail, toName);
-            string fromPassword = _emailConfiguration.Password;
-            const string subject = "Test";
-            string body = $"Hello {toName}! \n You have registered to SimpleAccount. \n Thank you!";
+            using (MailMessage mail = new MailMessage())
+            {
+                mail.From = new MailAddress(_emailConfiguration.Email);
+                mail.To.Add(toEmail);
+                mail.Subject = "Hello World";
+                mail.Body = $"<h1>Hello {toName}! \n You have registered to SimpleAccount. \n Thank you!</h1>";
+                mail.IsBodyHtml = true;
 
-            var smtp = new SmtpClient
-            {
-                Host = "smtp.gmail.com",
-                Port = 587,
-                EnableSsl = true,
-                DeliveryMethod = SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
-            };
-            using (var message = new MailMessage(fromAddress, toAddress)
-            {
-                Subject = subject,
-                Body = body
-            })
-            {
-                smtp.Send(message);
+                using (SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587))
+                {
+                    smtp.Credentials = new NetworkCredential(_emailConfiguration.Email, _emailConfiguration.Password);
+                    smtp.EnableSsl = true;
+                    smtp.Send(mail);
+                }
             }
+
+
+            //var fromAddress = new MailAddress(_emailConfiguration.Email, _emailConfiguration.Name);
+            //var toAddress = new MailAddress(toEmail, toName);
+            //string fromPassword = _emailConfiguration.Password;
+            //const string subject = "Test";
+            //string body = 
+
+            //var smtp = new SmtpClient
+            //{
+            //    Host = "smtp.gmail.com",
+            //    Port = 587,
+            //    EnableSsl = true,
+            //    DeliveryMethod = SmtpDeliveryMethod.Network,
+            //    UseDefaultCredentials = true,
+            //    Credentials = new NetworkCredential(fromAddress.Address, fromPassword)
+            //};
+            //using (var message = new MailMessage(fromAddress, toAddress)
+            //{
+            //    Subject = subject,
+            //    Body = body
+            //})
+            //{
+            //    smtp.Send(message);
+            //}
         }
 
     }

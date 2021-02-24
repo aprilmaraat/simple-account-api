@@ -39,6 +39,7 @@ namespace SimpleAccount.Api
             EmailConfiguration emailConfig = Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
             services.AddDbContext<SimpleAccountContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("SimpleAccount")));
+            services.AddTransient<IUserService, UserService>();
             services.AddSingleton<IEmailConfiguration>(emailConfig);
             services.AddControllers();
             services.AddCors(c =>
