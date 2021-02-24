@@ -35,7 +35,23 @@ namespace SimpleAccount.Services
             }
         }
 
-
+        /// <summary>
+        /// Gets the user data of the specified id
+        /// </summary>
+        /// <param name="id">Id of the user</param>
+        /// <returns></returns>
+        public async Task<Response<User>> UserDetail(int id) 
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+                return Response<User>.Success(user);
+            }
+            catch (Exception ex)
+            {
+                return Response<User>.Error(ex.Message);
+            }
+        }
 
     }
 }
