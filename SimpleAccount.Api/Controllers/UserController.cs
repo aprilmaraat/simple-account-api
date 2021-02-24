@@ -131,7 +131,7 @@ namespace SimpleAccount.Api.Controllers
         /// </summary>
         /// <param name="id">User Id to delete</param>
         /// <returns></returns>
-        [HttpPut("delete/{id}")]
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var response = await _userService.Delete(id);
