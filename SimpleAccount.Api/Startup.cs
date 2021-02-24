@@ -14,6 +14,7 @@ using SimpleAccount.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using SimpleAccount.Services;
+using SimpleAccount.Utilities;
 
 namespace SimpleAccount.Api
 {
@@ -35,8 +36,10 @@ namespace SimpleAccount.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            EmailConfiguration emailConfig = Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
             services.AddDbContext<SimpleAccountContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("SimpleAccount")));
+            services.AddSingleton<IEmailConfiguration>(emailConfig);
             services.AddControllers();
             services.AddCors(c =>
             {

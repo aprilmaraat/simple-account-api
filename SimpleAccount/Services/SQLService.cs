@@ -21,7 +21,7 @@ namespace SimpleAccount.Services
         ///// <param name="configuration">Application Configuration Settings</param>
         public static void Init(IConfiguration configuration)
         {
-            connectionString = configuration.GetConnectionString("HaydenDb");
+            connectionString = configuration.GetConnectionString("SimpleAccount");
         }
 
         /// <summary>
