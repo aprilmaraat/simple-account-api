@@ -7,6 +7,9 @@ using SimpleAccount.Models;
 
 namespace SimpleAccount.Api.Controllers
 {
+    /// <summary>
+    /// API controller for all <see cref="User"/> related transactions.
+    /// </summary>
     [Route("api/user")]
     public class UserController : BaseController
     {
@@ -18,6 +21,10 @@ namespace SimpleAccount.Api.Controllers
             _userService = userService;
         }
 
+        /// <summary>
+        /// API to get user list
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("user-list")]
         public async Task<IActionResult> List()
         {
@@ -34,6 +41,11 @@ namespace SimpleAccount.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// API to get user data
+        /// </summary>
+        /// <param name="id">Use Id</param>
+        /// <returns></returns>
         [HttpGet("user-detail/{id}")]
         public async Task<IActionResult> UserDetail(int id)
         {
@@ -50,6 +62,11 @@ namespace SimpleAccount.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// API used for logging in or verifying if login data exist.
+        /// </summary>
+        /// <param name="login">Login data request</param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest login)
         {
@@ -66,12 +83,58 @@ namespace SimpleAccount.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// API to create <see cref="User"/> data
+        /// </summary>
+        /// <param name="user">User data provided</param>
+        /// <returns></returns>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] User user)
         {
-            //logger here
-
             var response = await _userService.Register(user);
+
+            switch (response.State)
+            {
+                case ResponseState.Exception:
+                    return StatusCode(500, response.Exception.Message);
+                case ResponseState.Error:
+                    return BadRequest(response.MessageText);
+                default:
+                    return Ok(response);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        [HttpPut("update")]
+        public async Task<IActionResult> Update([FromBody] User user)
+        {
+            var response = await _userService.Update(user);
+
+            switch (response.State)
+            {
+                case ResponseState.Exception:
+                    return StatusCode(500, response.Exception.Message);
+                case ResponseState.Error:
+                    return BadRequest(response.MessageText);
+                default:
+                    return Ok(response);
+            }
+        }
+
+
+        /// <summary>
+        /// API to delete the specified Id of <see cref="User"/>
+        /// </summary>
+        /// <param name="id">User Id to delete</param>
+        /// <returns></returns>
+        [HttpPut("delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var response = await _userService.Delete(id);
 
             switch (response.State)
             {

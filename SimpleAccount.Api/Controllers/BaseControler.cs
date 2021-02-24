@@ -5,6 +5,9 @@ using SimpleAccount.Utilities;
 
 namespace SimpleAccount.Api.Controllers
 {
+    /// <summary>
+    /// Custom generic controller.
+    /// </summary>
     public class BaseController : Controller
     {
         private IEmailConfiguration _emailConfiguration;

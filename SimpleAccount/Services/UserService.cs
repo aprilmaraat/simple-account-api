@@ -11,13 +11,22 @@ using System.Net.Mail;
 
 namespace SimpleAccount.Services
 {
+    /// <summary>
+    /// Interface service for all <see cref="User"/> related transaction
+    /// </summary>
     public interface IUserService 
     {
         Task<Response<List<User>>> UserList();
         Task<Response<User>> UserDetail(int id);
         Task<Response> Login(LoginRequest login);
         Task<Response> Register(User user);
+        Task<Response<User>> Update(User user);
+        Task<Response> Delete(int id);
     }
+
+    /// <summary>
+    /// Service for all <see cref="User"/> related transaction
+    /// </summary>
     public class UserService : IUserService
     {
         private readonly SimpleAccountContext _context;
@@ -89,24 +98,70 @@ namespace SimpleAccount.Services
 
         public async Task<Response> Register(User user)
         {
-            using (var transaction = _context.Database.BeginTransaction())
+            using var transaction = _context.Database.BeginTransaction();
+            try
             {
-                try
-                {
-                    var exist = await _context.Users.AnyAsync(x => x.Email == user.Email);
-                    if (exist)
-                        return Response.Error("User email already exist.");
-                    await _context.Users.AddAsync(user);
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                    SendEmail(user.Email, user.LastName + ", " + user.FirstName);
-                    return Response.Success();
-                }
-                catch (Exception ex)
+                var exist = await _context.Users.AnyAsync(x => x.Email == user.Email);
+                if (exist)
+                    return Response.Error("User email already exist.");
+                await _context.Users.AddAsync(user);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                SendEmail(user.Email, user.LastName + ", " + user.FirstName);
+                return Response.Success();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return Response.Error(ex.Message);
+            }
+        }
+
+        public async Task<Response<User>> Update(User user) 
+        {
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                var exist = await _context.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
+                if (exist == null)
+                    return Response<User>.Error("User doesn't exist.");
+                if (exist.Email == user.Email)
+                    return Response<User>.Error("Email already used.");
+                exist.FirstName = user.FirstName;
+                exist.LastName = user.LastName;
+                exist.Email = user.Email;
+                exist.Password = user.Password;
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return Response<User>.Success(exist);
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return Response<User>.Error(ex.Message);
+            }
+        }
+
+        public async Task<Response> Delete(int id)
+        {
+            using var transaction = _context.Database.BeginTransaction();
+            try
+            {
+                var exist = await _context.Users.FirstOrDefaultAsync(x => x.Id == id);
+                if (exist == null)
                 {
                     await transaction.RollbackAsync();
-                    return Response.Error(ex.Message);
+                    return Response.Error("User doesn't exist.");
                 }
+                _context.Users.Remove(exist);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return Response.Success();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return Response.Error(ex.Message);
             }
         }
 
