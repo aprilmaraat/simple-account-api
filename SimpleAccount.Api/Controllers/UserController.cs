@@ -46,7 +46,7 @@ namespace SimpleAccount.Api.Controllers
         /// </summary>
         /// <param name="id">Use Id</param>
         /// <returns></returns>
-        [HttpGet("user-detail/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> UserDetail(int id)
         {
             var response = await _userService.UserDetail(id);
@@ -88,7 +88,7 @@ namespace SimpleAccount.Api.Controllers
         /// </summary>
         /// <param name="user">User data provided</param>
         /// <returns></returns>
-        [HttpPost("register")]
+        [HttpPost]
         public async Task<IActionResult> Register([FromBody] User user)
         {
             var response = await _userService.Register(user);
@@ -109,7 +109,7 @@ namespace SimpleAccount.Api.Controllers
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        [HttpPut("update")]
+        [HttpPut]
         public async Task<IActionResult> Update([FromBody] User user)
         {
             var response = await _userService.Update(user);
@@ -131,7 +131,7 @@ namespace SimpleAccount.Api.Controllers
         /// </summary>
         /// <param name="id">User Id to delete</param>
         /// <returns></returns>
-        [HttpDelete("delete/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var response = await _userService.Delete(id);
